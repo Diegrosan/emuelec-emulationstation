@@ -31,7 +31,8 @@
 #include "ThreadedHasher.h"
 #include <FreeImage.h>
 #include "ImageIO.h"
-#include "components/VideoVlcComponent.h"
+#include "components/VideoComponent.h"
+#include "components/VideoFFmpegComponent.h"
 #include <csignal>
 #include "InputConfig.h"
 #include "RetroAchievements.h"
@@ -370,22 +371,22 @@ void playVideo()
 
 	bool exitLoop = false;
 
-	VideoVlcComponent vid(&window);
-	vid.setVideo(gPlayVideo);
-	vid.setOrigin(0.5f, 0.5f);
-	vid.setPosition(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f);
-	vid.setMaxSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
+	std::unique_ptr<VideoComponent> vid(VideoComponent::create(&window));
+	vid->setVideo(gPlayVideo);
+	vid->setOrigin(0.5f, 0.5f);
+	vid->setPosition(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f);
+	vid->setMaxSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
 
-	vid.setOnVideoEnded([&exitLoop]()
+	vid->setOnVideoEnded([&exitLoop]()
 	{
 		exitLoop = true;
 		return false;
 	});
 
-	window.pushGui(&vid);
+	window.pushGui(vid.get());
 
-	vid.onShow();
-	vid.topWindow(true);
+	vid->onShow();
+	vid->topWindow(true);
 
 	int lastTime = SDL_GetTicks();
 	int totalTime = 0;
@@ -407,7 +408,7 @@ void playVideo()
 		int curTime = SDL_GetTicks();
 		int deltaTime = curTime - lastTime;
 
-		if (vid.isPlaying())
+		if (vid->isPlaying())
 		{
 			totalTime += deltaTime;
 
@@ -416,8 +417,8 @@ void playVideo()
 		}
 
 		Transform4x4f transform = Transform4x4f::Identity();
-		vid.update(deltaTime);
-		vid.render(transform);
+		vid->update(deltaTime);
+		vid->render(transform);
 
 		Renderer::swapBuffers();
 
@@ -556,7 +557,7 @@ int err = snd_pcm_open(&pcm_handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
 	SystemScreenSaver screensaver(&window);
 	ViewController::init(&window);
 	CollectionSystemManager::init(&window);
-	VideoVlcComponent::init();
+	VideoFFmpegComponent::init();
 
 	window.pushGui(ViewController::get());
 	if(!window.init(true, false))

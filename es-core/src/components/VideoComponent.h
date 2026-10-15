@@ -36,6 +36,7 @@ class VideoComponent : public GuiComponent
 	};
 
 public:
+	static VideoComponent* create(Window* window);
 	VideoComponent(Window* window);
 	virtual ~VideoComponent();
 
@@ -127,6 +128,8 @@ public:
 
 	float getRoundCorners() { return mRoundCorners; }
 	virtual void setRoundCorners(float value);
+	virtual void setLinearSmooth(bool value = true) {}
+	virtual void setEffect(int effect) {}
 	
 	bool isFading() {
 		return mIsPlaying && mFadeIn < 1.0;

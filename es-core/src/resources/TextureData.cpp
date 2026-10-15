@@ -9,7 +9,6 @@
 #include <nanosvg/nanosvgrast.h>
 #include <string.h>
 #include <algorithm>
-#include <vlc/vlc.h>
 
 #include "Settings.h"
 #include "utils/ZipFile.h"
@@ -245,10 +244,6 @@ bool TextureData::updateFromExternalRGBA(unsigned char* dataRGBA, size_t width, 
 // Avoid multiple extraction in the same file at the same time
 static Utils::StringListLockType mImageExtractorLock;
 
-#if WIN32
-extern void _checkUpgradedVlcVersion();
-#endif
-
 bool TextureData::loadFromVideo()
 {
 	Utils::StringListLock lock(mImageExtractorLock, mPath);
@@ -270,71 +265,9 @@ bool TextureData::loadFromVideo()
 	{
 		Utils::FileSystem::createDirectory(Utils::FileSystem::getParent(localFile));
 
-		libvlc_instance_t *vlcInstance = nullptr;
-		libvlc_media_t *vlcMedia = nullptr;
-		libvlc_media_player_t *vlcMediaPlayer = nullptr;
-
-		std::vector<std::string> cmdline;
-		cmdline.push_back("--quiet");
-		cmdline.push_back("--rate=1");
-		cmdline.push_back("--video-filter=scene");
-		cmdline.push_back("--intf=dummy");
-		cmdline.push_back("--vout=dummy");
-		cmdline.push_back("--scene-format=jpeg");
-		cmdline.push_back("--scene-ratio=1");
-		cmdline.push_back("--no-video-title-show");
-
-		const char** vlcArgs = new const char*[cmdline.size()];
-
-		for (int i = 0; i < cmdline.size(); i++)
-			vlcArgs[i] = cmdline[i].c_str();
-
-#if WIN32
-		_checkUpgradedVlcVersion();
-#endif
-
-		vlcInstance = libvlc_new(cmdline.size(), vlcArgs);
-		if (vlcInstance == nullptr)
+		std::string cmd = "ffmpeg -y -i " + Utils::FileSystem::getEscapedPath(mPath) + " -ss 1.5 -vframes 1 -hide_banner -loglevel error " + Utils::FileSystem::getEscapedPath(localFile);
+		if (system(cmd.c_str()) != 0)
 			return false;
-
-		vlcMedia = libvlc_media_new_path(vlcInstance, Utils::FileSystem::getPreferredPath(mPath).c_str());
-		if (vlcMedia == nullptr)
-		{
-			libvlc_release(vlcInstance);
-			return false;
-		}
-
-		libvlc_media_add_option(vlcMedia, ":no-audio");
-		libvlc_media_add_option(vlcMedia, ":start-time=1.5");
-
-		vlcMediaPlayer = libvlc_media_player_new_from_media(vlcMedia);
-		if (vlcMediaPlayer == nullptr)
-		{
-			libvlc_media_release(vlcMedia);
-			libvlc_release(vlcInstance);
-			return false;
-		}
-
-		int ms = 1500;
-
-		libvlc_media_player_set_rate(vlcMediaPlayer, 1);
-		libvlc_audio_set_mute(vlcMediaPlayer, 1);
-		libvlc_media_player_play(vlcMediaPlayer);
-		libvlc_media_player_set_time(vlcMediaPlayer, ms);
-
-		auto time = libvlc_media_player_get_time(vlcMediaPlayer);
-		int n = 100; // avoid infinite loop
-		while (time <= ms && n > 0) {
-			time = libvlc_media_player_get_time(vlcMediaPlayer);
-			n--;
-		}
-
-		int result = libvlc_video_take_snapshot(vlcMediaPlayer, 0, localFile.c_str(), 0, 0);
-
-		libvlc_media_player_stop(vlcMediaPlayer);
-		libvlc_media_player_release(vlcMediaPlayer);
-		libvlc_media_release(vlcMedia);
-		libvlc_release(vlcInstance);
 	}
 
 	if (Utils::FileSystem::exists(localFile))

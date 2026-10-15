@@ -78,8 +78,7 @@ set(CORE_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextEditComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoComponent.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoPlayerComponent.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoVlcComponent.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoFFmpegComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VolumeInfoComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/MultiLineMenuEntry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ScrollbarComponent.h	
@@ -210,8 +209,7 @@ set(CORE_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextEditComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoComponent.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoPlayerComponent.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoVlcComponent.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoFFmpegComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VolumeInfoComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ScrollbarComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/MultiLineMenuEntry.cpp

@@ -25,9 +25,6 @@ if(WIN32)
 	
 	MESSAGE("-- Destination platform : " ${CMAKE_GENERATOR_PLATFORM})
 
-	if(NOT VLC_VERSION)
-		set(VLC_VERSION 1.0.0)
-	endif()
 
 	if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../batocera-emulationstation-win32-dependencies)
 		set(CUSTOM_LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/../batocera-emulationstation-win32-dependencies)
@@ -79,8 +76,6 @@ if(WIN32 AND CUSTOM_LIBDIR)
 	  ${CUSTOM_LIBDIR}/SDL2_mixer/${CUSTOM_PLATFORM}
 	  ${CUSTOM_LIBDIR}/SDL2
 	  ${CUSTOM_LIBDIR}/SDL2/${CUSTOM_PLATFORM}
-	  ${CUSTOM_LIBDIR}/libvlc
-	  ${CUSTOM_LIBDIR}/libvlc/${CUSTOM_PLATFORM}
 	  ${CUSTOM_LIBDIR}/curl/${CUSTOM_PLATFORM}
 	)
 endif()
@@ -185,7 +180,45 @@ find_package(SDL2MIXER REQUIRED)
 # batocera / customisations
 find_package(SDL2 REQUIRED)
 find_package(CURL REQUIRED)
-find_package(VLC REQUIRED)
+option(ENABLE_INTERN_FFMPEG "Set to ON to enable STATIC FILE ffmpeg" ON)
+
+if(ENABLE_INTERN_FFMPEG)
+    set(FFMPEG_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/static/ffmpeg/include")
+
+    # Automatic switch between DRM and FBDEV:
+    find_library(LIBDRM_LIBRARY NAMES drm)
+    if(LIBDRM_LIBRARY)
+        message(STATUS "DRM detected: using static FFmpeg DRM from ${CMAKE_CURRENT_SOURCE_DIR}/static/ffmpeg/drm")
+        set(FFMPEG_STATIC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/static/ffmpeg/drm")
+    else()
+        message(STATUS "FBDEV detected: using static FFmpeg FBDEV from ${CMAKE_CURRENT_SOURCE_DIR}/static/ffmpeg/fdev")
+        set(FFMPEG_STATIC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/static/ffmpeg/fdev")
+    endif()
+
+    set(FFMPEG_LIBRARIES
+        "${FFMPEG_STATIC_DIR}/libavformat.a"
+        "${FFMPEG_STATIC_DIR}/libavcodec.a"
+        "${FFMPEG_STATIC_DIR}/libswresample.a"
+        "${FFMPEG_STATIC_DIR}/libswscale.a"
+        "${FFMPEG_STATIC_DIR}/libavutil.a"
+        ssl
+        crypto
+        bz2
+        z
+        dav1d
+        speex
+        xml2
+    )
+
+    if(LIBDRM_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${LIBDRM_LIBRARY})
+    endif()
+
+    set(FFMPEG_FOUND TRUE)
+else()
+    message(STATUS "Using system FFmpeg")
+    find_package(FFMPEG REQUIRED)
+endif()
 find_package(RapidJSON REQUIRED)
 
 if(NOT WIN32)
@@ -312,7 +345,7 @@ set(COMMON_INCLUDE_DIRS
     # batocera / customisations    
     ${SDL2_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
-    ${VLC_INCLUDE_DIR}
+    ${FFMPEG_INCLUDE_DIRS}
     ${RAPIDJSON_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/external
     ${CMAKE_CURRENT_SOURCE_DIR}/es-core/src
@@ -394,7 +427,7 @@ set(COMMON_LIBRARIES
     ${SDLMIXER_LIBRARY}
     # batocera / customisations    
     ${CURL_LIBRARIES}
-    ${VLC_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     pugixml
     nanosvg
     id3v2

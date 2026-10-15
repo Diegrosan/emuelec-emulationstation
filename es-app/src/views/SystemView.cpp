@@ -16,7 +16,6 @@
 #include "AudioManager.h"
 #include "Log.h"
 #include "components/VideoComponent.h"
-#include "components/VideoVlcComponent.h"
 #include "guis/GuiNetPlay.h"
 #include "SystemRandomPlaylist.h"
 #include "playlists/M3uPlaylist.h"
@@ -1075,7 +1074,7 @@ void  SystemView::getViewElements(const std::shared_ptr<ThemeData>& theme)
 	{
 		if (Utils::String::startsWith(name, "staticBackground"))
 		{
-			VideoVlcComponent* sv = new VideoVlcComponent(mWindow);
+			VideoComponent* sv = VideoComponent::create(mWindow);
 			sv->applyTheme(theme, "system", name, ThemeFlags::ALL);
 			mStaticBackgrounds.push_back(sv);
 		}

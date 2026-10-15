@@ -1,4 +1,10 @@
 #include "components/VideoComponent.h"
+#include "components/VideoFFmpegComponent.h"
+
+VideoComponent* VideoComponent::create(Window* window)
+{
+	return new VideoFFmpegComponent(window);
+}
 
 #include "resources/ResourceManager.h"
 #include "utils/FileSystemUtil.h"
@@ -494,6 +500,10 @@ void VideoComponent::manageState()
 				mStartDelayed = false;
 				mIsWaitingForVideoToStart = false;
 				stopVideo();
+			}
+			else if (isPaused())
+			{
+				resumeVideo();
 			}
 		}
 	}

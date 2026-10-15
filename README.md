@@ -8,21 +8,21 @@ Building
 
 EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux, or Visual Studio 2015 on Windows, to compile.
 
-EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL, RapidJSON, LibVLC, SDLMixer.  You also should probably install the `fonts-droid` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time). Your distro may also offer a "system developer" group of packages that includes essential compilation tools, it is recommended to install that first.
+EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL, RapidJSON, FFmpeg, SDLMixer.  You also should probably install the `fonts-droid` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time). Your distro may also offer a "system developer" group of packages that includes essential compilation tools, it is recommended to install that first.
 
 **On Debian/Ubuntu:**
 All of this can be easily installed with `apt-get`:
 ```bash
 sudo apt-get install libsdl2-dev libsdl2-mixer-dev libfreeimage-dev libfreetype6-dev \
   libcurl4-openssl-dev rapidjson-dev libasound2-dev libgl1-mesa-dev build-essential \
-  libboost-all-dev cmake fonts-droid-fallback libvlc-dev libvlccore-dev vlc-bin libint-dev gettext
+  libboost-all-dev cmake fonts-droid-fallback libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev ffmpeg libint-dev gettext
 ```
 **On Fedora:**
 All of this can be easily installed with `dnf` (with rpmfusion activated) :
 ```bash
 sudo dnf install SDL2-devel freeimage-devel freetype-devel curl-devel \
   alsa-lib-devel mesa-libGL-devel cmake \
-  vlc-devel rapidjson-devel 
+  ffmpeg-devel rapidjson-devel 
 ```
 **On Arch/Manjaro:**
 All of this can be easily installed with `pacman`:
@@ -33,7 +33,7 @@ sudo pacman -S base-devel cmake freeimage sdl2_mixer sdl2 rapidjson boost
 All of this can be easily installed with `eopkg`:
 ```bash
 sudo eopkg it -c system.devel sdl2-devel freeimage-devel freetype2-devel curl-devel \
-  rapidjson-devel alsa-lib-devel mesalib-devel vlc-devel sdl2-mixer-devel \
+  rapidjson-devel alsa-lib-devel mesalib-devel ffmpeg-devel sdl2-mixer-devel \
   libcec-devel
 ```
 
@@ -86,7 +86,7 @@ cmake -DUSE_MESA_GLES=On .
 
 [SDL Mixer](https://www.libsdl.org/projects/SDL_mixer/) 
 
-[LibVlc](http://download.videolan.org/pub/videolan/vlc/) (x86 sdk files are present in .7z files)
+[FFmpeg](https://ffmpeg.org/) (x86 sdk files / shared libraries)
 
 [CMake](http://www.cmake.org/cmake/resources/software.html) (this is used for generating the Visual Studio project)
 
@@ -96,7 +96,7 @@ set ES_LIB_DIR=c:\src\lib
 mkdir c:\src\batocera-emulationstation\build
 cd c:\src\batocera-emulationstation\build /D
 
-cmake -g "Visual Studio 14 2015 x86" .. -DEIGEN3_INCLUDE_DIR=%ES_LIB_DIR%\eigen -DRAPIDJSON_INCLUDE_DIRS=%ES_LIB_DIR%\rapidjson\include -DFREETYPE_INCLUDE_DIRS=%ES_LIB_DIR%\freetype-2.7\include -DFREETYPE_LIBRARY=%ES_LIB_DIR%\freetype-2.7\objs\vc2010\Win32\freetype27.lib -DFreeImage_INCLUDE_DIR=%ES_LIB_DIR%\FreeImage\Source -DFreeImage_LIBRARY=%ES_LIB_DIR%\FreeImage\Dist\x32\FreeImage.lib -DSDL2_INCLUDE_DIR=%ES_LIB_DIR%\SDL2-2.0.9\include -DSDL2_LIBRARY=%ES_LIB_DIR%\SDL2-2.0.9\build\Release\SDL2.lib;%ES_LIB_DIR%\SDL2-2.0.9\build\Release\SDL2main.lib;Imm32.lib;version.lib -DBOOST_ROOT=%ES_LIB_DIR%\boost_1_61_0 -DBoost_LIBRARY_DIR=%ES_LIB_DIR%\boost_1_61_0\lib32-msvc-14.0 -DCURL_INCLUDE_DIR=%ES_LIB_DIR%\curl-7.50.3\include -DCURL_LIBRARY=%ES_LIB_DIR%\curl-7.50.3\builds\libcurl-vc14-x86-release-dll-ipv6-sspi-winssl\lib\libcurl.lib -DVLC_INCLUDE_DIR=%ES_LIB_DIR%\libvlc-2.2.2\include -DVLC_LIBRARIES=%ES_LIB_DIR%\libvlc-2.2.2\lib\msvc\libvlc.lib;%ES_LIB_DIR%\libvlc-2.2.2\lib\msvc\libvlccore.lib -DVLC_VERSION=1.0.0 -DSDLMIXER_INCLUDE_DIR=%ES_LIB_DIR%\SDL2_mixer-2.0.4\include -DSDLMIXER_LIBRARY=%ES_LIB_DIR%\SDL2_mixer-2.0.4\lib\x86\SDL2_mixer.lib
+cmake -g "Visual Studio 14 2015 x86" .. -DEIGEN3_INCLUDE_DIR=%ES_LIB_DIR%\eigen -DRAPIDJSON_INCLUDE_DIRS=%ES_LIB_DIR%\rapidjson\include -DFREETYPE_INCLUDE_DIRS=%ES_LIB_DIR%\freetype-2.7\include -DFREETYPE_LIBRARY=%ES_LIB_DIR%\freetype-2.7\objs\vc2010\Win32\freetype27.lib -DFreeImage_INCLUDE_DIR=%ES_LIB_DIR%\FreeImage\Source -DFreeImage_LIBRARY=%ES_LIB_DIR%\FreeImage\Dist\x32\FreeImage.lib -DSDL2_INCLUDE_DIR=%ES_LIB_DIR%\SDL2-2.0.9\include -DSDL2_LIBRARY=%ES_LIB_DIR%\SDL2-2.0.9\build\Release\SDL2.lib;%ES_LIB_DIR%\SDL2-2.0.9\build\Release\SDL2main.lib;Imm32.lib;version.lib -DBOOST_ROOT=%ES_LIB_DIR%\boost_1_61_0 -DBoost_LIBRARY_DIR=%ES_LIB_DIR%\boost_1_61_0\lib32-msvc-14.0 -DCURL_INCLUDE_DIR=%ES_LIB_DIR%\curl-7.50.3\include -DCURL_LIBRARY=%ES_LIB_DIR%\curl-7.50.3\builds\libcurl-vc14-x86-release-dll-ipv6-sspi-winssl\lib\libcurl.lib -DFFMPEG_INCLUDE_DIRS=%ES_LIB_DIR%\ffmpeg\include -DFFMPEG_LIBRARIES=%ES_LIB_DIR%\ffmpeg\lib\avformat.lib;%ES_LIB_DIR%\ffmpeg\lib\avcodec.lib;%ES_LIB_DIR%\ffmpeg\lib\avutil.lib;%ES_LIB_DIR%\ffmpeg\lib\swscale.lib;%ES_LIB_DIR%\ffmpeg\lib\swresample.lib -DSDLMIXER_INCLUDE_DIR=%ES_LIB_DIR%\SDL2_mixer-2.0.4\include -DSDLMIXER_LIBRARY=%ES_LIB_DIR%\SDL2_mixer-2.0.4\lib\x86\SDL2_mixer.lib
 ```
 
 Launching outside of Batocera
